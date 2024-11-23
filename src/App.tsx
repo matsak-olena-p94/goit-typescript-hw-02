@@ -1,11 +1,11 @@
-import SearchBar from "./components/SearchBar/SearchBar";
-import ImageGallery from "./components/ImageGallery/ImageGallery";
-import Loader from "./components/Loader/Loader";
-import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
-import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import { useEffect, useState } from 'react';
-import { fetchArticles } from './services/api';
+import SearchBar from './components/SearchBar/SearchBar';
+import ImageGallery from './components/ImageGallery/ImageGallery';
+import Loader from './components/Loader/Loader';
+import ErrorMessage from './components/ErrorMessage/ErrorMessage';
+import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
 import ImageModal from './components/ImageModal/ImageModal';
+import { fetchArticles } from './services/api';
 
 function App() {
   const [images, setImages] = useState([]);
@@ -14,17 +14,28 @@ function App() {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchImages = async () => {
-      if (query === '') return; 
+      if (!query) {
+        setImages([]);
+        return;
+      }
+
       try {
         setIsError(false);
         setIsLoading(true);
+
         const response = await fetchArticles(query, page);
-setImages(response.data || response.results || []);
+
+        setImages((prevImages) => {
+          const newImages = page === 1 ? response.results : [...prevImages, ...response.results];
+          // Видаляємо дублікати за унікальним ідентифікатором
+          return [...new Map(newImages.map((img) => [img.id, img])).values()];
+        });
       } catch (error) {
+        console.error('Error fetching images:', error.message);
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -32,17 +43,17 @@ setImages(response.data || response.results || []);
     };
 
     fetchImages();
-  }, [query, page]); 
+  }, [query, page]);
 
   const handleSearch = (newQuery) => {
-    if (newQuery !== query) { 
+    if (newQuery !== query) {
       setQuery(newQuery);
       setPage(1);
     }
   };
 
   const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);  
+    setPage((prevPage) => prevPage + 1);
   };
 
   const openModal = (imageUrl) => {
@@ -65,11 +76,11 @@ setImages(response.data || response.results || []);
         <LoadMoreBtn handleClick={handleLoadMore} />
       )}
 
-      {selectedImage && (
-        <ImageModal 
-          isOpen={isModalOpen} 
-          onClose={closeModal} 
-          imageUrl={selectedImage} 
+      {isModalOpen && selectedImage && (
+        <ImageModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          imageUrl={selectedImage}
         />
       )}
     </>
