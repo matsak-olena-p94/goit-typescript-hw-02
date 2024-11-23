@@ -22,14 +22,8 @@ function App() {
       try {
         setIsError(false);
         setIsLoading(true);
-
         const response = await fetchArticles(query, page);
-        
-        if (page === 1) {
-          setImages(response.results);
-        } else {
-          setImages((prevImages) => [...prevImages, ...response.results]);
-        }
+setImages(response.data || response.results || []);
       } catch (error) {
         setIsError(true);
       } finally {
@@ -41,8 +35,10 @@ function App() {
   }, [query, page]); 
 
   const handleSearch = (newQuery) => {
-    setQuery(newQuery);  
-    setPage(1);  
+    if (newQuery !== query) { 
+      setQuery(newQuery);
+      setPage(1);
+    }
   };
 
   const handleLoadMore = () => {
