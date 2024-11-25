@@ -6,16 +6,10 @@ import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import { useEffect, useState } from 'react';
 import { fetchArticles } from './services/api';
 import ImageModal from './components/ImageModal/ImageModal';
-
-
-interface Image {
-  id: string;
-  url: string;
-  title: string;
-}
+import AppImage from './services/api';
 
 function App() {
-  const [images, setImages] = useState<Image[]>([]); 
+  const [images, setImages] = useState<AppImage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false); 
   const [page, setPage] = useState<number>(1); 
@@ -31,7 +25,11 @@ function App() {
         setIsLoading(true);
 
         const response = await fetchArticles(query, page);
-
+        const transformedResults = response.results.map((item: any) => ({
+          id: item.id,
+          url: item.url,
+          title: item.title,
+        }));
         if (page === 1) {
           setImages(response.results);
         } else {
