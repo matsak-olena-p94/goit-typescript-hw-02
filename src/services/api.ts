@@ -1,28 +1,22 @@
-import axios from 'axios';
-
-interface Image {
-    id: string;
-    urls: {
-        small: string;
-        regular: string;
-    };
-    description?: string;
+// Тип для зображення
+export interface Image {
+  id: string;
+  url: string;
+  title: string;
 }
 
-interface FetchArticlesResponse {
-    results: Image[];
-    total: number;
-    total_pages: number;
-}
+// Функція для запиту до API
+export const fetchArticles = async (
+  query: string,
+  page: number
+): Promise<{ results: Image[] }> => {
+  const API_URL = `https://api.example.com/search?query=${query}&page=${page}`;
+  
+  const response = await fetch(API_URL);
 
-export const fetchArticles = async (query: string, page: number = 1): Promise<FetchArticlesResponse> => {
-    const { data } = await axios.get<FetchArticlesResponse>('https://api.unsplash.com/search/photos/', {
-      params: {
-        client_id: 'FZK5K8CibqNmzzFrZMI9trJWic4JElwNhSKQb-6L8Jk',
-        query: query,
-        page: page,
-        per_page: 12, 
-      },
-    });
-    return data;
-}
+  if (!response.ok) {
+    throw new Error('Failed to fetch');
+  }
+
+  return await response.json();
+};

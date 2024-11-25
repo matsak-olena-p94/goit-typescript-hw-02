@@ -7,24 +7,31 @@ import { useEffect, useState } from 'react';
 import { fetchArticles } from './services/api';
 import ImageModal from './components/ImageModal/ImageModal';
 
+
+interface Image {
+  id: string;
+  url: string;
+  title: string;
+}
+
 function App() {
-  const [images, setImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [page, setPage] = useState(1);
-  const [query, setQuery] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [images, setImages] = useState<Image[]>([]); 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false); 
+  const [page, setPage] = useState<number>(1); 
+  const [query, setQuery] = useState<string>(''); 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); 
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false); 
 
   useEffect(() => {
     const fetchImages = async () => {
-      if (query === '') return; 
+      if (query === '') return;
       try {
         setIsError(false);
         setIsLoading(true);
 
         const response = await fetchArticles(query, page);
-        
+
         if (page === 1) {
           setImages(response.results);
         } else {
@@ -38,18 +45,18 @@ function App() {
     };
 
     fetchImages();
-  }, [query, page]); 
+  }, [query, page]);
 
-  const handleSearch = (newQuery) => {
-    setQuery(newQuery);  
-    setPage(1);  
+  const handleSearch = (newQuery: string) => {
+    setQuery(newQuery);
+    setPage(1);
   };
 
   const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1);  
+    setPage((prevPage) => prevPage + 1);
   };
 
-  const openModal = (imageUrl) => {
+  const openModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);
     setIsModalOpen(true);
   };
